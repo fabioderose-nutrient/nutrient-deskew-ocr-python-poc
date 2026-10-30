@@ -1,0 +1,12 @@
+{
+  "file": "skewed-scan.pdf",
+  "applied_skew_degrees": [
+    -3.2,
+    1.8,
+    0.0,
+    4.5,
+    -1.4,
+    2.6
+  ],
+  "note": "Positive = rotated counter-clockwise when the page was scanned."
+}
