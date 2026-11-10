@@ -93,11 +93,13 @@ NUTRIENT_OCR_WORKERS=4 python deskew_ocr.py path/to/scan.pdf
 
 ### Docker
 
-The `Dockerfile` builds a Linux image with the SDK and the ICU library. Limit the CPUs to match your production container:
+The `Dockerfile` builds a Linux image with the SDK and the ICU library. It also runs the sample once at build time, so the OCR models are downloaded into the image: otherwise every fresh container, or serverless cold start, downloads them before its first document. In a container limited to 2 CPUs, the 6-page sample took 7.1 s on 1.0 core without that step and 3.9 s on 1.9 cores with it. Pass the languages you use: their models are downloaded at build time and the value becomes the image's default `NUTRIENT_OCR_LANGUAGES`:
 
 ```bash
-docker build -t deskew-ocr .
+docker build -t deskew-ocr --build-arg NUTRIENT_OCR_LANGUAGES=dan+eng .
 ```
+
+Limit the CPUs to match your production container:
 
 ```bash
 docker run --rm --cpus=2 deskew-ocr latency.py --config 1x1 --config 1x2 --config 2x1
