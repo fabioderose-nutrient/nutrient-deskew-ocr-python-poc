@@ -19,7 +19,7 @@ Three OCR settings are tuned for speed:
 
 ## What sets the time of one document
 
-- **The CPU time per page is fixed.** It depends on the page size, resolution and amount of text, not on the code around it. `enable_preprocessing`, `enable_table_detection` and the render DPI did not change the time of `make_searchable()` in our tests. `favor_accuracy = False` saves about 10% of CPU time.
+- **The CPU time per page is fixed.** It depends on the page size, resolution and amount of text, not on the code around it. `enable_preprocessing`, `enable_table_detection` and the render DPI did not change the time of `make_searchable()` in our tests. `favor_accuracy = False` saves about 8% of CPU time.
 - **So the time of one document goes down with the number of cores working on it.** `max_threads` does that inside `editor.make_searchable()`. The SDK default is `1`, so one core.
 - **Call the document-level `editor.make_searchable()`.** `page.make_searchable()` called page by page runs on one core whatever `max_threads` says.
 - **Check the cores you really get.** `latency.py` prints "cores used" (CPU time / wall time). In a container limited to 2 CPUs, any `max_threads` above 2 gives the same time as 2.
