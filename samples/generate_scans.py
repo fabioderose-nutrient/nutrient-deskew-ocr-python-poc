@@ -7,8 +7,14 @@ Every company, person and figure in the document is invented.
 
     pip install -r samples/requirements.txt
     python samples/generate_scans.py
+
+With --pages N it writes skewed-scan-Np.pdf instead: the six pages repeated
+up to N pages, each with its own skew, to measure the time of a long document.
+
+    python samples/generate_scans.py --pages 68
 """
 
+import argparse
 import io
 import json
 import textwrap
@@ -106,7 +112,7 @@ RESPONSE_TABLE = [("Priority", "Example", "Attend within"), ("1 - Emergency", "F
                   ("4 - Planned", "Minor repairs, adjustments", "10 working days")]
 
 
-def draw_page(number, title, paragraphs):
+def draw_page(number, title, paragraphs, total=len(PAGES)):
     img = Image.new("L", (W, H), 255)
     d = ImageDraw.Draw(img)
     body, bold = font("regular", 40), font("bold", 44)
@@ -130,7 +136,7 @@ def draw_page(number, title, paragraphs):
             d.text((x, y), line, font=body, fill=0)
             y += 58
         y += 34
-    d.text((W // 2, H - 170), f"Page {number} of {len(PAGES)}", font=font("regular", 32), fill=0, anchor="ma")
+    d.text((W // 2, H - 170), f"Page {number} of {total}", font=font("regular", 32), fill=0, anchor="ma")
     return img
 
 
@@ -149,7 +155,24 @@ def scan(img, angle, seed):
     return Image.open(io.BytesIO(buf.getvalue()))
 
 
+def long_document(total):
+    rng = np.random.default_rng(total)
+    pages = []
+    for i in range(total):
+        title, paragraphs = PAGES[i % len(PAGES)]
+        pages.append(scan(draw_page(i + 1, title, paragraphs, total), float(rng.uniform(-4.5, 4.5)), i))
+    out = HERE / f"skewed-scan-{total}p.pdf"
+    pages[0].save(out, "PDF", resolution=DPI, save_all=True, append_images=pages[1:])
+    print(f"{out.name}: {total} pages, {out.stat().st_size // 1024} KB")
+
+
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pages", type=int, help="write a long document of this many pages")
+    args = parser.parse_args()
+    if args.pages:
+        long_document(args.pages)
+        return
     pages = [scan(draw_page(i + 1, t, p), ANGLES[i], i) for i, (t, p) in enumerate(PAGES)]
     out = HERE / "skewed-scan.pdf"
     pages[0].save(out, "PDF", resolution=DPI, save_all=True, append_images=pages[1:])

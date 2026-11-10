@@ -20,7 +20,11 @@ from pathlib import Path
 # Not imported from deskew_ocr: the parent process must not load the native
 # SDK, only the workers do.
 DEFAULT_INPUT = Path(__file__).resolve().parent / "samples" / "skewed-scan.pdf"
-OCR_THREADS = int(os.environ.get("NUTRIENT_OCR_THREADS", "2"))
+# A batch shares the cores between documents: 2 OCR threads per worker unless
+# NUTRIENT_OCR_THREADS is set to a positive value (0 = one thread per core in
+# every worker would oversubscribe the CPU). The workers inherit the value.
+OCR_THREADS = int(os.environ.get("NUTRIENT_OCR_THREADS") or 0) or 2
+os.environ["NUTRIENT_OCR_THREADS"] = str(OCR_THREADS)
 
 
 def _init_worker() -> None:

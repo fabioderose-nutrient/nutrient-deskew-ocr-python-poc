@@ -18,3 +18,6 @@ outputs/
 .idea/
 .vscode/
 *.zip
+
+# Long samples written by samples/generate_scans.py --pages N
+samples/skewed-scan-*p.pdf

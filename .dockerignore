@@ -1,0 +1,5 @@
+.venv
+.git
+outputs
+samples/skewed-scan-*p.pdf
+.env
